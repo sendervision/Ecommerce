@@ -1,4 +1,4 @@
-const mongoose = from'mongoose');
+import mongoose from 'mongoose';
 
 const orderSchema = mongoose.Schema({
     orderItems : [{
@@ -55,4 +55,5 @@ orderSchema.set('toJSON', {
     virtuals: true,
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+const ORDER = mongoose.model('Order', orderSchema);
+export { ORDER };

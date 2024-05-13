@@ -1,3 +1,4 @@
-module.exports = {
-  url:'mongodb+srv://<username>:<password>:@learning.eauwn.mongodb.net/ecommerce-api?retryWrites=true&w=majority'
+export const dbConfig = {
+  url:"mongodb://127.0.0.1:27017",
+  dbName: "dbme"
 };

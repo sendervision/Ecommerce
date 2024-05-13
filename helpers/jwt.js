@@ -1,4 +1,4 @@
-const jwt  = from'express-jwt');
+import jwt from 'express-jwt';
 
 function authJwt() {
     const secret = process.env.secret;
@@ -26,4 +26,4 @@ async function isRevoked (req, payload, done){
     done();
 }
 
-module.exports = authJwt;
+export { authJwt };

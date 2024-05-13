@@ -1,10 +1,11 @@
-const express = from'express');
-const router = express.Router();
-const mongoose = from'mongoose');
-const multer = from'multer');
+import express from'express';
+import mongoose from'mongoose';
+import multer from'multer';
 
-const Product = from'../models/product');
-const Category = from'../models/category');
+import { PRODUCT } from'../models/product.js';
+import { CATEGORIES } from'../models/category.js';
+
+export const productRoute = express.Router();
 
 const FILE_TYPE_MAP = {
     'image/png': 'png',
@@ -30,7 +31,7 @@ const storage = multer.diskStorage({
 
 const upload  = multer({ storage: storage })
 
-router.get('/', async (req, res)=> {
+productRoute.get('/', async (req, res)=> {
 
     let filter = {};
     if(req.query.categories)
@@ -38,16 +39,16 @@ router.get('/', async (req, res)=> {
         filter = {category: req.query.categories.split(',')}
     }
 
-    const productList = await Product.find(filter).populate('category');
-    // const productList = await Product.find(filter).select('name image');
+    const productList = await PRODUCT.find(filter).populate('category');
+    // const productList = await PRODUCT.find(filter).select('name image');
     if (!productList) {
         res.status(500), json({success:false})
     }
     res.status(200).send(productList);
 })
 
-router.get('/:id', async (req, res) => {
-    const product = await Product.findById(req.params.id).populate('category');
+productRoute.get('/:id', async (req, res) => {
+    const product = await PRODUCT.findById(req.params.id).populate('category');
 
     if (!product) {
         res.status(500).json({ success: false, message: 'The product with the given ID not exists' })
@@ -55,13 +56,13 @@ router.get('/:id', async (req, res) => {
     res.status(200).send(product)
 })
 
-router.post('/', upload.single('image'), async (req, res) => {
+productRoute.post('/', upload.single('image'), async (req, res) => {
 
     if(!mongoose.isValidObjectId(req.params.id)){
         res.status(400).send('Invalid Product ID')
     }
 
-    const category = await Category.findById(req.body.category);
+    const category = await CATEGORIES.findById(req.body.category);
     if (!category)
         return res.status(400).send('Invalid Category')
 
@@ -72,7 +73,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     const fileName = file.filename;
     const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
 
-    let product = new Product({
+    let product = new PRODUCT({
         name: req.body.name,
         description: req.body.description,
         richDescription: req.body.richDescription,
@@ -94,13 +95,13 @@ router.post('/', upload.single('image'), async (req, res) => {
     res.send(product);
 })
 
-router.put('/:id', async (req, res) => {
+productRoute.put('/:id', async (req, res) => {
 
-    const category = await Category.findById(req.body.category);
+    const category = await CATEGORIES.findById(req.body.category);
     if (!category)
         return res.status(400).send('Invalid Category')
 
-    const product = await Product.findByIdAndUpdate(req.params.id, {
+    const product = await PRODUCT.findByIdAndUpdate(req.params.id, {
         name: req.body.name,
         description: req.body.description,
         richDescription: req.body.richDescription,
@@ -121,8 +122,8 @@ router.put('/:id', async (req, res) => {
     res.send(product);
 })
 
-router.delete('/:id', (req, res) => {
-    Product.findByIdAndRemove(req.params.id).then(product => {
+productRoute.delete('/:id', (req, res) => {
+    PRODUCT.findByIdAndRemove(req.params.id).then(product => {
         if (product) {
             return res.status(200).json({ success: true, message: 'Product deleted successfully' })
         } else {
@@ -133,8 +134,8 @@ router.delete('/:id', (req, res) => {
     })
 })
 
-router.get('/get/count', async (req, res) => {
-    const productCount = await Product.countDocuments((count)=>count);
+productRoute.get('/get/count', async (req, res) => {
+    const productCount = await PRODUCT.countDocuments((count)=>count);
     if (!productCount) {
         res.status(500), json({ success: false })
     }
@@ -143,16 +144,16 @@ router.get('/get/count', async (req, res) => {
     });
 })
 
-router.get('/get/featured/:count', async (req, res) => {
+productRoute.get('/get/featured/:count', async (req, res) => {
     const count = req.params.count ? req.params.count: 0
-    const products = await Product.find({ isFeatured: true}).limit(+count);
+    const products = await PRODUCT.find({ isFeatured: true}).limit(+count);
     if (!products) {
         res.status(500), json({ success: false })
     }
     res.status(200).send(products);
 })
 
-router.put('/gallery-images/:id', upload.array('images', 10), async (req, res) => {
+productRoute.put('/gallery-images/:id', upload.array('images', 10), async (req, res) => {
 
     if (!mongoose.isValidObjectId(req.params.id)) {
         res.status(400).send('Invalid Product ID')
@@ -167,7 +168,7 @@ router.put('/gallery-images/:id', upload.array('images', 10), async (req, res) =
         })
     }
 
-    const product = await Product.findByIdAndUpdate(req.params.id, {
+    const product = await PRODUCT.findByIdAndUpdate(req.params.id, {
 
         image: imagesPaths,
     },
@@ -179,5 +180,3 @@ router.put('/gallery-images/:id', upload.array('images', 10), async (req, res) =
         return res.status(500).send('Product cannot be updated')
     res.send(product);
 })
-
-module.exports = router;

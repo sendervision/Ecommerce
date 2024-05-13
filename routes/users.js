@@ -1,12 +1,12 @@
-const express = from'express');
-const bcrypt = from'bcryptjs');
-const jwt = from'jsonwebtoken');
-const router = express.Router();
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { USER } from '../models/User.js';
 
-const User = from'../models/User');
+export const userRoute = express.Router();
 
-router.get('/', async (req, res) =>{
-    const userList = await User.find().select('-passwordHash');
+userRoute.get('/', async (req, res) =>{
+    const userList = await USER.find().select('-passwordHash');
 
     if(!userList) {
         res.status(500).json({success:false})
@@ -14,8 +14,8 @@ router.get('/', async (req, res) =>{
     res.send(userList);
 })
 
-router.get ('/:id', async (req, res) => {
-    const user = await User.findById(req.params.id).select('-passwordHash');
+userRoute.get ('/:id', async (req, res) => {
+    const user = await USER.findById(req.params.id).select('-passwordHash');
 
     if (!user) {
         res.status(500).json({ success: false, message: 'The user with the given ID not exists' })
@@ -24,8 +24,8 @@ router.get ('/:id', async (req, res) => {
     
 })
 
-router.post('/register', async (req, res) => {
-    let user = new User({
+userRoute.post('/register', async (req, res) => {
+    let user = new USER({
         name: req.body.name,
         email: req.body.email,
         passwordHash: bcrypt.hashSync(req.body.password, 10),
@@ -45,8 +45,8 @@ router.post('/register', async (req, res) => {
     res.send(user);
 })
 
-router.delete('/:id', (req, res) => {
-    User.findByIdAndRemove(req.params.id).then(user => {
+userRoute.delete('/:id', (req, res) => {
+    USER.findByIdAndRemove(req.params.id).then(user => {
         if (user) {
             return res.status(200).json({ success: true, message: 'User deleted successfully' })
         } else {
@@ -57,8 +57,8 @@ router.delete('/:id', (req, res) => {
     })
 })
 
-router.post('/login', async (req, res) => {
-    const user = await User.findOne({ email: req.body.email})
+userRoute.post('/login', async (req, res) => {
+    const user = await USER.findOne({ email: req.body.email})
     const secret = process.env.secret;
 
     if(!user) {
@@ -78,8 +78,8 @@ router.post('/login', async (req, res) => {
     return res.status(200).send(user);
 })
 
-router.get('/get/count', async (req, res) => {
-    const userCount = await User.countDocuments((count) => count);
+userRoute.get('/get/count', async (req, res) => {
+    const userCount = await USER.countDocuments((count) => count);
     if (!userCount) {
         res.status(500), json({ success: false })
     }
@@ -88,4 +88,3 @@ router.get('/get/count', async (req, res) => {
     });
 })
 
-module.exports = router;

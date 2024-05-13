@@ -1,4 +1,4 @@
-const mongoose = from'mongoose');
+import mongoose from 'mongoose';
 
 const orderItemSchema = mongoose.Schema({
     quantity: {
@@ -11,4 +11,5 @@ const orderItemSchema = mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('OrderItem', orderItemSchema);
+const ORDERITEM = mongoose.model('OrderItem', orderItemSchema);
+export { ORDERITEM }
